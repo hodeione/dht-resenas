@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Messages } from './components/Messages'
 import { PosterStudio } from './components/PosterStudio'
+import { ReviewReplier } from './components/ReviewReplier'
 import { SetupForm } from './components/SetupForm'
 import { Signature } from './components/Signature'
 import { Button, SectionTitle } from './components/ui'
@@ -37,7 +38,7 @@ export default function App() {
         {/* Hero */}
         <section className="py-12 sm:py-16">
           <p className="mb-4 inline-block border border-acid/40 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.25em] text-acid">
-            Gratis · sin registro · en 2 minutos
+            Gratis · sin registro · con IA
           </p>
           <h1 className="font-display text-6xl leading-[0.9] tracking-wide sm:text-8xl">
             Consigue más
@@ -46,7 +47,7 @@ export default function App() {
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-mute">
             Crea carteles con QR, tarjetas de mesa, mensajes de WhatsApp y una firma de email que llevan a tus clientes directamente a escribir su reseña.
-            Más reseñas significa aparecer antes en Google Maps.
+            Y responde a cada reseña en segundos con IA. Más reseñas bien respondidas significa aparecer antes en Google Maps.
           </p>
         </section>
 
@@ -94,7 +95,14 @@ export default function App() {
         </section>
 
         <section className="pb-16">
-          <SectionTitle n="05" title="Cómo conseguir más reseñas" />
+          <SectionTitle n="05" title="Responde a tus reseñas con IA">
+            Responder a todas las reseñas mejora tu posición en Google y da confianza. Pega una y elige entre tres respuestas listas para publicar.
+          </SectionTitle>
+          <ReviewReplier businessName={cfg.businessName} />
+        </section>
+
+        <section className="pb-16">
+          <SectionTitle n="06" title="Cómo conseguir más reseñas" />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {TIPS.map((t) => (
               <div key={t.title} className="rounded-xl border border-line p-5">
@@ -134,7 +142,7 @@ export default function App() {
               DH Technology
             </a>
           </span>
-          <span>Sin cookies · sin registro · tus datos no salen de tu navegador</span>
+          <span>Sin cookies · sin registro · no guardamos tus datos</span>
         </div>
       </footer>
     </div>
