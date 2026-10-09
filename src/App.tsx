@@ -204,6 +204,7 @@ export default function App() {
               Hablar con DH Technology →
             </Button>
             <Button href={DHT_URL}>Ver servicios</Button>
+            <Button href="https://dht-fotos.vercel.app">Optimizar fotos gratis ↗</Button>
           </div>
         </section>
       </main>
