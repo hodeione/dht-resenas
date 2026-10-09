@@ -60,6 +60,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 }
 
+/** GET /api/responder: indica a la web si la IA está activada (sin revelar nada más). */
 export function GET(): Response {
-  return json(405, { error: 'Usa POST.' }, { allow: 'POST' })
+  return json(200, { configured: Boolean(process.env.ANTHROPIC_API_KEY) }, { 'cache-control': 'no-store' })
 }

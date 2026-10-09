@@ -15,8 +15,34 @@ export function SetupForm({ cfg, update, link }: Props) {
   const fileRef = useRef<HTMLInputElement>(null)
   const showLinkState = cfg.reviewInput.trim().length > 0
 
+  const steps = [
+    { label: 'Nombre', done: cfg.businessName.trim().length > 1 },
+    { label: 'Enlace', done: link.ok },
+    { label: 'Logo', done: Boolean(cfg.logo), optional: true },
+  ]
+  const required = steps.filter((st) => !st.optional)
+  const pct = Math.round((required.filter((st) => st.done).length / required.length) * 100)
+
   return (
     <Card className="space-y-6">
+      <div>
+        <div className="mb-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em]">
+          <span className={pct === 100 ? 'text-acid' : 'text-mute'}>{pct === 100 ? '✓ Kit listo para descargar' : 'Completa tu kit'}</span>
+          <span className="text-mute">{pct}%</span>
+        </div>
+        <div className="h-1 overflow-hidden rounded-full bg-line" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Progreso del kit">
+          <div className="h-full rounded-full bg-acid transition-all duration-500" style={{ width: `${pct}%` }} />
+        </div>
+        <ul className="mt-2 flex flex-wrap gap-3 text-xs">
+          {steps.map((st) => (
+            <li key={st.label} className={st.done ? 'text-acid' : 'text-mute'}>
+              {st.done ? '✓' : '○'} {st.label}
+              {st.optional && !st.done && <span className="text-mute/70"> (opcional)</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
+
       <div>
         <Label htmlFor="name">Nombre del negocio</Label>
         <input

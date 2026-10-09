@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { copyText } from '../lib/export'
 import { Button, Card, CopyButton, Label, inputCls } from './ui'
 
@@ -45,7 +45,28 @@ const LANG_OPTIONS = [
   ['pt', 'Português'],
 ] as const
 
+const EXAMPLES = [
+  {
+    label: '★★★★★ Positiva',
+    stars: 5,
+    text: 'Fuimos a cenar el sábado y todo genial. La tortilla, increíble, y el camarero muy atento con los niños. ¡Repetiremos seguro!',
+  },
+  {
+    label: '★★ Negativa',
+    stars: 2,
+    text: 'Esperamos casi 40 minutos a que nos trajeran la comida y nadie se disculpó. La comida estaba bien, pero así no volvemos.',
+  },
+  {
+    label: '★★★★ En inglés',
+    stars: 4,
+    text: 'Lovely little place near the beach. Great coffee and friendly staff, although it was a bit noisy at lunchtime.',
+  },
+]
+
+type AiStatus = 'checking' | 'on' | 'off'
+
 export function ReviewReplier({ businessName }: { businessName: string }) {
+  const [aiStatus, setAiStatus] = useState<AiStatus>('checking')
   const [review, setReview] = useState('')
   const [stars, setStars] = useState<number | null>(null)
   const [businessType, setBusinessType] = useState('')
@@ -56,7 +77,19 @@ export function ReviewReplier({ businessName }: { businessName: string }) {
   const [result, setResult] = useState<ReplyResult | null>(null)
   const [edited, setEdited] = useState<string[]>([])
 
+  useEffect(() => {
+    let alive = true
+    fetch('/api/responder', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : { configured: false }))
+      .then((d) => alive && setAiStatus(d.configured ? 'on' : 'off'))
+      .catch(() => alive && setAiStatus('off'))
+    return () => {
+      alive = false
+    }
+  }, [])
+
   async function generate() {
+    if (aiStatus === 'off') return
     setState('loading')
     setError('')
     try {
@@ -77,11 +110,11 @@ export function ReviewReplier({ businessName }: { businessName: string }) {
   }
 
   const tooLong = review.length > MAX
-  const canSend = review.trim().length >= 3 && !tooLong && state !== 'loading'
+  const canSend = review.trim().length >= 3 && !tooLong && state !== 'loading' && aiStatus === 'on'
 
   return (
     <Card>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
         <div className="space-y-4">
           <div>
             <Label htmlFor="review" hint={<span className={tooLong ? 'text-red-300' : ''}>{review.length}/{MAX}</span>}>
@@ -93,7 +126,29 @@ export function ReviewReplier({ businessName }: { businessName: string }) {
               placeholder="Pega aquí la reseña tal como aparece en Google…"
               value={review}
               onChange={(e) => setReview(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && canSend) {
+                  e.preventDefault()
+                  generate()
+                }
+              }}
             />
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-mute">Probar con:</span>
+              {EXAMPLES.map((ex) => (
+                <button
+                  key={ex.label}
+                  type="button"
+                  onClick={() => {
+                    setReview(ex.text)
+                    setStars(ex.stars)
+                  }}
+                  className="rounded-full border border-line px-2.5 py-1 text-xs text-soft transition-colors hover:border-acid hover:text-acid"
+                >
+                  {ex.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>
@@ -141,9 +196,18 @@ export function ReviewReplier({ businessName }: { businessName: string }) {
             </select>
           </div>
 
-          <Button variant="primary" disabled={!canSend} onClick={generate}>
-            {state === 'loading' ? 'Pensando respuestas…' : '✦ Generar 3 respuestas'}
-          </Button>
+          {aiStatus === 'off' && (
+            <div className="rounded-lg border border-amber-300/40 bg-amber-300/10 p-3 text-sm text-amber-100">
+              <b className="font-mono text-[11px] uppercase tracking-wider text-amber-300">Próximamente</b>
+              <p className="mt-1">El respondedor con IA se está activando. Mientras tanto, el resto del kit funciona con normalidad.</p>
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-3">
+            <Button variant="primary" disabled={!canSend} onClick={generate}>
+              {state === 'loading' ? 'Pensando respuestas…' : state === 'done' ? '↻ Generar otras 3' : '✦ Generar 3 respuestas'}
+            </Button>
+            {aiStatus === 'on' && <span className="hidden font-mono text-[10px] uppercase tracking-wider text-mute sm:inline">Ctrl + Intro</span>}
+          </div>
           <p className="text-xs text-mute">
             La reseña se envía a la IA de Anthropic solo para generar las respuestas y no se guarda en esta web. No pegues datos que no aparezcan ya en la reseña pública.
           </p>

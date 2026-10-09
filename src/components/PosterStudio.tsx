@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { KitConfig } from '../lib/config'
 import { downloadPng, downloadSvg, printSvg, slugify } from '../lib/export'
+import { buildKitZip } from '../lib/zip'
 import { FORMATS, buildPoster, type PosterFormat } from '../lib/posters'
 import { Button, Card } from './ui'
 
@@ -9,6 +10,7 @@ const EXAMPLE_URL = 'https://g.page/r/ejemplo/review'
 export function PosterStudio({ cfg, url }: { cfg: KitConfig; url: string | null }) {
   const [format, setFormat] = useState<PosterFormat>('a4')
   const [busy, setBusy] = useState(false)
+  const [zipProgress, setZipProgress] = useState<string | null>(null)
   const [error, setError] = useState('')
   const spec = FORMATS.find((f) => f.id === format)!
   const ready = url !== null
@@ -17,15 +19,28 @@ export function PosterStudio({ cfg, url }: { cfg: KitConfig; url: string | null 
   const base = `resenas-${slugify(cfg.businessName)}-${format}`
 
   return (
-    <Card className="lg:sticky lg:top-6">
-      <div role="tablist" aria-label="Formato" className="mb-4 flex flex-wrap gap-1.5">
+    <Card className="lg:sticky lg:top-20">
+      <div
+        role="tablist"
+        aria-label="Formato"
+        className="no-scrollbar -mx-1 mb-4 flex gap-1.5 overflow-x-auto px-1 pb-1 sm:flex-wrap"
+        onKeyDown={(e) => {
+          if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return
+          const i = FORMATS.findIndex((f) => f.id === format)
+          const next = FORMATS[(i + (e.key === 'ArrowRight' ? 1 : FORMATS.length - 1)) % FORMATS.length]
+          setFormat(next.id)
+          ;(e.currentTarget.querySelector(`[data-id="${next.id}"]`) as HTMLButtonElement | null)?.focus()
+        }}
+      >
         {FORMATS.map((f) => (
           <button
             key={f.id}
+            data-id={f.id}
             role="tab"
             aria-selected={format === f.id}
+            tabIndex={format === f.id ? 0 : -1}
             onClick={() => setFormat(f.id)}
-            className={`rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors ${
+            className={`shrink-0 rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors ${
               format === f.id ? 'bg-acid text-ink' : 'border border-line text-mute hover:text-soft'
             }`}
           >
@@ -77,6 +92,38 @@ export function PosterStudio({ cfg, url }: { cfg: KitConfig; url: string | null 
         <Button disabled={!ready} onClick={() => downloadSvg(svg, `${base}.svg`)} title="Vectorial, para imprentas o diseñadores">
           ↓ SVG
         </Button>
+      </div>
+      <div className="mt-3 rounded-lg border border-dashed border-acid/40 p-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-soft">
+            <b>Kit completo:</b> los 5 formatos en PNG y SVG, con instrucciones de impresión.
+          </p>
+          <Button
+            variant="primary"
+            disabled={!ready || zipProgress !== null}
+            onClick={async () => {
+              setError('')
+              setZipProgress('0/5')
+              try {
+                const blob = await buildKitZip(cfg, url!, (d, t) => setZipProgress(`${d}/${t}`))
+                const href = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = href
+                a.download = `kit-resenas-${slugify(cfg.businessName)}.zip`
+                document.body.appendChild(a)
+                a.click()
+                a.remove()
+                setTimeout(() => URL.revokeObjectURL(href), 2000)
+              } catch (e) {
+                setError((e as Error).message)
+              } finally {
+                setZipProgress(null)
+              }
+            }}
+          >
+            {zipProgress ? `Preparando ${zipProgress}…` : '↓ Descargar todo (.zip)'}
+          </Button>
+        </div>
       </div>
       {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
       <p className="mt-3 text-xs text-mute">

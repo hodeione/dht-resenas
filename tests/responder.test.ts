@@ -76,6 +76,13 @@ describe('POST /api/responder', () => {
     expect((await POST(req({ review: 'Muy bien todo' }, { 'x-forwarded-for': '9.9.9.9' }))).status).toBe(200)
   })
 
+  it('GET informa de si la IA está activada', async () => {
+    const { GET } = await import('../api/responder')
+    expect(await GET().json()).toEqual({ configured: false })
+    process.env.ANTHROPIC_API_KEY = 'k'
+    expect(await GET().json()).toEqual({ configured: true })
+  })
+
   it('traduce el rechazo de seguridad a un 422', async () => {
     process.env.ANTHROPIC_API_KEY = 'k'
     create.mockResolvedValue({ stop_reason: 'refusal', content: [] })

@@ -20,7 +20,7 @@ export function Messages({ businessName, url }: { businessName: string; url: str
 
   return (
     <Card>
-      <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
         <div className="space-y-4">
           <div>
             <Label>Plantilla</Label>

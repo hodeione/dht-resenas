@@ -4,7 +4,7 @@ Herramienta gratuita para que cualquier negocio local consiga más reseñas en G
 
 **[▶ Probar la herramienta](https://dht-resenas.vercel.app)** · Hecho por [DH Technology](https://h-com-bay.vercel.app)
 
-![Captura de la herramienta](docs/app.png)
+![Portada del kit con vista previa en vivo](docs/hero.png)
 
 ## Qué hace
 
@@ -13,6 +13,7 @@ Herramienta gratuita para que cualquier negocio local consiga más reseñas en G
 | **Valida el enlace** | Reconoce los enlaces de Google («Pedir reseñas», `writereview`, Maps o un Place ID suelto), los corrige y avisa si no abren directamente el formulario de reseña. |
 | **5 formatos imprimibles** | Cartel A4, tarjeta de mesa que se dobla, pegatina de 100 mm, tarjeta de visita y hoja de 10 tarjetas con marcas de corte. |
 | **Calidad de imprenta** | Descarga en PNG a 300 ppp, en SVG vectorial o en PDF a tamaño real desde el diálogo de impresión. |
+| **Kit completo en un clic** | Un ZIP con los 5 formatos en PNG y SVG y un LEEME con instrucciones de impresión. |
 | **Marca propia** | Logo, colores y textos personalizables, en castellano, inglés, catalán, euskera y gallego. |
 | **Mensajes** | Plantillas para WhatsApp, SMS y email con el nombre del cliente, que se abren directamente en la app correspondiente. |
 | **Firma de email** | Botón «Déjanos tu reseña» que se pega con formato en Gmail u Outlook. |
@@ -59,7 +60,7 @@ React 19 · TypeScript · Vite · Tailwind CSS 4 · qrcode · API de Claude · V
 ```bash
 npm install
 npm run dev      # servidor de desarrollo
-npm test         # 33 pruebas (QR, enlaces, carteles, API con cliente simulado)
+npm test         # 34 pruebas (QR, enlaces, carteles, API con cliente simulado)
 npm run build    # compilación de producción en dist/
 ```
 
