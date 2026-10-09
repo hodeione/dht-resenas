@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { describe, expect, it } from 'vitest'
-import { MODEL, RateLimiter, buildUserMessage, generateReplies, isAllowedOrigin, validateInput, type ReplyInput } from './reply'
+import { MODEL, RateLimiter, buildUserMessage, generateReplies, isAllowedOrigin, validateInput, type ReplyInput } from '../api/_lib/reply'
 
 const input: ReplyInput = { review: 'Muy buen café', stars: 5, business: 'Café Luna', businessType: 'cafetería', signature: 'Ana', lang: 'auto' }
 

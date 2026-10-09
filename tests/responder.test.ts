@@ -31,13 +31,13 @@ describe('POST /api/responder', () => {
 
   it('rechaza orígenes ajenos', async () => {
     process.env.ANTHROPIC_API_KEY = 'k'
-    const { POST } = await import('./responder')
+    const { POST } = await import('../api/responder')
     const r = await POST(req({ review: 'hola' }, { origin: 'https://evil.com' }))
     expect(r.status).toBe(403)
   })
 
   it('avisa si falta la clave', async () => {
-    const { POST } = await import('./responder')
+    const { POST } = await import('../api/responder')
     const r = await POST(req({ review: 'hola' }))
     expect(r.status).toBe(503)
     expect((await r.json()).code).toBe('not_configured')
@@ -45,7 +45,7 @@ describe('POST /api/responder', () => {
 
   it('valida la entrada', async () => {
     process.env.ANTHROPIC_API_KEY = 'k'
-    const { POST } = await import('./responder')
+    const { POST } = await import('../api/responder')
     expect((await POST(req('{malformado'))).status).toBe(400)
     expect((await POST(req({ review: '' }))).status).toBe(400)
     expect(create).not.toHaveBeenCalled()
@@ -65,7 +65,7 @@ describe('POST /api/responder', () => {
         },
       ],
     })
-    const { POST } = await import('./responder')
+    const { POST } = await import('../api/responder')
     const first = await POST(req({ review: 'Muy bien todo' }))
     expect(first.status).toBe(200)
     expect((await first.json()).respuestas[0].texto).toBe('gracias')
@@ -79,7 +79,7 @@ describe('POST /api/responder', () => {
   it('traduce el rechazo de seguridad a un 422', async () => {
     process.env.ANTHROPIC_API_KEY = 'k'
     create.mockResolvedValue({ stop_reason: 'refusal', content: [] })
-    const { POST } = await import('./responder')
+    const { POST } = await import('../api/responder')
     expect((await POST(req({ review: 'texto' }))).status).toBe(422)
   })
 })
